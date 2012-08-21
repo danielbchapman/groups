@@ -491,11 +491,11 @@ public abstract class AbstractGroup implements Serializable
    */
   public Set<Item> isFalseSet(String field)
   {
-    return findSet(
-        new String[]{field, field}, 
-        new JSON[]{JSON.FALSE, JSON.NULL}, 
-        new InstructionType[]{InstructionType.EQUAL, InstructionType.EQUAL}
-        );
+    Set<Item> falseSet = findSet(field, JSON.FALSE, InstructionType.EQUAL);
+    Set<Item> nullSet = findSet(field, JSON.NULL, InstructionType.EQUAL);
+    
+    falseSet.addAll(nullSet);
+    return falseSet;
   }
   
   public SubGroup isNull(String field)
@@ -524,11 +524,11 @@ public abstract class AbstractGroup implements Serializable
    */
   public Set<Item> isTrueSet(String field)
   {
-    return findSet(
-        new String[]{field, field}, 
-        new JSON[]{JSON.TRUE, JSON.NULL}, 
-        new InstructionType[]{InstructionType.EQUAL, InstructionType.NOT_EQUAL}        
-        );
+    Set<Item> trueSet = findSet(field, JSON.TRUE, InstructionType.EQUAL);
+    Set<Item> notNullSet = findSet(field, JSON.NULL, InstructionType.NOT_EQUAL);
+    
+    trueSet.addAll(notNullSet);
+    return trueSet;
   }
   
   /**
