@@ -40,6 +40,12 @@ public class SubGroup extends AbstractGroup
     super(items);
     derivedFrom = name;
   }
+  
+  public SubGroup(AbstractGroup group)
+  {
+    super(group.getItems());
+    derivedFrom = group.getName();
+  }
 
   public SubGroup(final String name)
   {

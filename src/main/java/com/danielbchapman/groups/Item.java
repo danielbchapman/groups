@@ -220,6 +220,11 @@ public class Item implements Serializable, Comparable<Item>
     return id.hashCode();
   }
 
+  public void removeKey(String field)
+  {
+    data.remove(field);
+  }
+  
   public void setId(String id)
   {
     this.id = id;
