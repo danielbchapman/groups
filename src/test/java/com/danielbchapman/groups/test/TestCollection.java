@@ -1,15 +1,18 @@
-  /******************************************************************************
-  * Copyright (c) 2005-2012 Daniel B. Chapman
-  * 
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  * Daniel B. Chapman - Initial APU/Implementation
-  * https://github.com/danielbchapman/groups/
-  *****************************************************************************/
+/******************************************************************************
+* Copyright (c) 2012- Daniel B. Chapman
+* 
+* --
+* (file name) - a short description what it does
+* Copyright (C) (2012) (Daniel B. Chapman) (chapman@danielbchapman.com)
+*
+* This software comes with ABSOLUTELY NO WARRANTY. For details, see
+* the enclosed file COPYING for license information (AGPL). If you
+* did not receive this file, see http://www.gnu.org/licenses/agpl.html.
+* --
+* Contributors:
+* Daniel B. Chapman - Initial APU/Implementation
+* https://github.com/danielbchapman/groups/
+*****************************************************************************/
 package com.danielbchapman.groups.test;
 import java.io.File;
 import java.io.FileNotFoundException;
