@@ -139,7 +139,7 @@ public class JSON implements Comparable<JSON>, Serializable
         return data.compareTo(toCompare.data);
       case NUMBER:
       case DATE:
-        return Float.valueOf(data).compareTo(Float.valueOf(toCompare.data));
+        return Double.valueOf(data).compareTo(Double.valueOf(toCompare.data));
       case BOOLEAN:
         return Boolean.valueOf(data).compareTo(Boolean.valueOf(toCompare.data));
       default:
@@ -262,7 +262,7 @@ public class JSON implements Comparable<JSON>, Serializable
           if (value instanceof Number)
           {
             type = JSONType.NUMBER;
-            data = Float.valueOf(value.toString()).toString();
+            data = Double.valueOf(value.toString()).toString();
           }
 
           else
