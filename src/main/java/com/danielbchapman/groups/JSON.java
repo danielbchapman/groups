@@ -13,6 +13,7 @@
 package com.danielbchapman.groups;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * A primitive immutable JSON data-type
@@ -101,9 +102,9 @@ public class JSON implements Comparable<JSON>, Serializable
     return new JSON(value);
   }
 
-  private final String data;
+  private String data;
 
-  private final JSONType type;
+  private JSONType type;
 
   /**
    * Construct a new JSON object from a String/Boolean/Number. Currently
@@ -112,42 +113,7 @@ public class JSON implements Comparable<JSON>, Serializable
    */
   public JSON(Object value)
   {
-    if (value == null)
-    {
-      type = JSONType.NULL;
-      data = null;
-    }
-    else
-      if (value instanceof JSON)
-      {
-        type = ((JSON) value).getType();
-        data = ((JSON) value).getString();
-      }
-      else
-        if (value instanceof String)
-        {
-          type = JSONType.STRING;
-          data = (String) value;
-        }
-
-        else
-          if (value instanceof Number)
-          {
-            type = JSONType.NUMBER;
-            data = Float.valueOf(value.toString()).toString();
-          }
-
-          else
-            if (value instanceof Boolean)
-            {
-              type = JSONType.BOOLEAN;
-              data = value.toString();
-            }
-            else
-            {
-              type = JSONType.NULL;
-              data = null;
-            }
+    mutateValue(value);
   }
 
   private JSON(String data, JSONType type)
@@ -172,6 +138,7 @@ public class JSON implements Comparable<JSON>, Serializable
       case STRING:
         return data.compareTo(toCompare.data);
       case NUMBER:
+      case DATE:
         return Float.valueOf(data).compareTo(Float.valueOf(toCompare.data));
       case BOOLEAN:
         return Boolean.valueOf(data).compareTo(Boolean.valueOf(toCompare.data));
@@ -223,15 +190,20 @@ public class JSON implements Comparable<JSON>, Serializable
   {
     return Boolean.valueOf(data);
   }
+  
+  public Date getDate()
+  {
+    return new Date(Long.valueOf(data)); 
+  }
 
   public Integer getInteger()
   {
     return Integer.valueOf((int) Math.floor(getNumber()));
   }
 
-  public Float getNumber()
+  public Double getNumber()
   {
-    return Float.valueOf(data);
+    return Double.valueOf(data);
   }
 
   public String getRegexSafeString()
@@ -264,5 +236,60 @@ public class JSON implements Comparable<JSON>, Serializable
     builder.append(data);
     builder.append("\"");
     return builder.toString();
+  }
+  
+  protected void mutateValue(Object value)
+  {
+    if (value == null)
+    {
+      type = JSONType.NULL;
+      data = null;
+    }
+    else
+      if (value instanceof JSON)
+      {
+        type = ((JSON) value).getType();
+        data = ((JSON) value).getString();
+      }
+      else
+        if (value instanceof String)
+        {
+          type = JSONType.STRING;
+          data = (String) value;
+        }
+
+        else
+          if (value instanceof Number)
+          {
+            type = JSONType.NUMBER;
+            data = Float.valueOf(value.toString()).toString();
+          }
+
+          else
+            if (value instanceof Boolean)
+            {
+              type = JSONType.BOOLEAN;
+              data = value.toString();
+            }
+            else if (value instanceof Date)
+            {
+              type = JSONType.DATE;
+              data = Long.toString(((Date) value).getTime());
+            }
+            else
+            {
+              type = JSONType.NULL;
+              data = null;
+            }
+  }
+  
+  /**
+   * Return a copy of this object as a mutable 
+   * value.
+   * @return A mutable JSON value  
+   */
+  public MutableJSON mutable()
+  {
+    return new MutableJSON(this);
   }
 }
