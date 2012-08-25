@@ -10,7 +10,7 @@
 * did not receive this file, see http://www.gnu.org/licenses/agpl.html.
 * --
 * Contributors:
-* Daniel B. Chapman - Initial APU/Implementation
+* Daniel B. Chapman - Initial API/Implementation
 * https://github.com/danielbchapman/groups/
 *****************************************************************************/
 package com.danielbchapman.groups.test;
