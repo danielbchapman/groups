@@ -207,7 +207,7 @@ public abstract class AbstractGroup implements Serializable
    * @param value the value (Number/String/Boolean etc...), if you pass garbage you will get garbage.
    * @param instruction the instruction for comparison
    * @return A SubGroup of the set that was searched representing the results.
-   * @See {@link #findSet(String, JSON, InstructionType)} 
+   * @see {@link #findSet(String, JSON, InstructionType)} 
    */
   public SubGroup find(String field, JSON json, InstructionType type)
   {
@@ -221,7 +221,7 @@ public abstract class AbstractGroup implements Serializable
    * @param value the value (Number/String/Boolean etc...), if you pass garbage you will get garbage.
    * @param instruction the instruction for comparison
    * @return A SubGroup of the set that was searched representing the results.
-   * @See {@link #find(String, JSON, InstructionType)}
+   * @see {@link #find(String, JSON, InstructionType)}
    */
   public SubGroup find(String field, Object value, InstructionType type)
   {
@@ -320,7 +320,7 @@ public abstract class AbstractGroup implements Serializable
    * @param value the value (Number/String/Boolean etc...), if you pass garbage you will get garbage.
    * @param instruction the instruction for comparison
    * @return A Set&lt;Item&gt; of the items with the provided instruction
-   * @See {@link #findSet(String, JSON, InstructionType)} 
+   * @see {@link #findSet(String, JSON, InstructionType)} 
    * 
    */
   public Set<Item> findSet(String field, Object value, InstructionType instruction)
