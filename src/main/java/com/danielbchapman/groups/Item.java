@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -153,7 +154,7 @@ public class Item implements Serializable, Comparable<Item>
     ret.setId(getId());
 
     for (String key : getKeys())
-      ret.setValue(key, getValue(key));
+      ret.setValue(key, getValue(key).copy());
 
     return ret;
   }
@@ -177,6 +178,15 @@ public class Item implements Serializable, Comparable<Item>
     return true;
   }
 
+  public boolean has(String field)
+  {
+    JSON j = getValue(field); 
+    if(j.isNullOrUndefined())
+      return true;
+    
+    return JSON.empty(j);
+  }
+  
   public String getId()
   {
     return id;
@@ -188,13 +198,27 @@ public class Item implements Serializable, Comparable<Item>
    */
   public Set<String> getKeys()
   {
-    return Collections.unmodifiableSet(data.keySet());
+    Set<String> newKeys = new HashSet<String>();
+    
+    for(String s : data.keySet())
+      newKeys.add(s);
+    
+    return Collections.unmodifiableSet(newKeys);
   }
 
+  /**
+   * Return the value for this field. If the value is not set
+   * and is not in the keyset it will return UNDEFINED else
+   * it will return NULL;
+   * 
+   * If the value exists that value will be returned.
+   * @param field the field to look for (key)
+   * @return the JSON value of that field, NULL or UNDEFINED.
+   */
   public JSON getValue(final String field)
   {
-    if (id == null)
-      return null;
+//    if (id == null)
+//      return null;
 
     if (data.containsKey(field))
     {
@@ -202,7 +226,7 @@ public class Item implements Serializable, Comparable<Item>
       if (ret == null)
         return JSON.NULL;
 
-      return ret;
+      return ret.copy();
     }
     else
       return JSON.UNDEFINED;

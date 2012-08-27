@@ -130,6 +130,12 @@ public abstract class AbstractGroup implements Serializable
   {
   }
 
+  public AbstractGroup(AbstractGroup group)
+  {
+    for (Item i : group.getItems())
+      put(i);
+  }
+
   public AbstractGroup(java.util.Collection<Item> items)
   {
     for (Item i : items)
@@ -142,12 +148,6 @@ public abstract class AbstractGroup implements Serializable
       put(i);
   }
 
-  public AbstractGroup(AbstractGroup group)
-  {
-    for (Item i : group.getItems())
-      put(i);
-  }
-
   public SubGroup contains(String field, String value)
   {
     return wrap(containsSet(field, value));
@@ -156,6 +156,31 @@ public abstract class AbstractGroup implements Serializable
   public Set<Item> containsSet(String field, String value)
   {
     return findSet(field, JSON.wrap(value), InstructionType.CONTAINS);
+  }
+
+  /**
+   * Return the uncommon elements (elements not shared by A or B)
+   * (Opposite of an intersection)
+   * @param other
+   * @return the difference of the two groups  
+   * 
+   */
+  public SubGroup difference(SubGroup other)
+  {
+    Set<Item> local = hashSet();
+    Set<Item> otherSet = other.hashSet();
+    
+    HashSet<Item> difference = new HashSet<Item>();
+    
+    for(Item i : local)
+      if(!otherSet.contains(i))
+        difference.add(i);
+    
+    for(Item i : otherSet)
+      if(!local.contains(i))
+        difference.add(i);
+    
+    return new SubGroup(difference, getName());
   }
 
   public SubGroup doesNotContain(String field, String value)
@@ -485,6 +510,19 @@ public abstract class AbstractGroup implements Serializable
   }
 
   /**
+   * Return the intersection (common elements)
+   * @param other the set to intersect with
+   * @return the intersection of the set of the two groups  
+   * 
+   */
+  public SubGroup intersection(SubGroup other)
+  {
+    Set<Item> local = hashSet();
+    local.retainAll(other.hashSet());
+    return new SubGroup(local, getName());
+  }
+
+  /**
    * @param field the field to search
    * @return a set of objects where the field is false/null/undefined
    * 
@@ -648,59 +686,6 @@ public abstract class AbstractGroup implements Serializable
       put(new Item(id, values));
   }
 
-  /**
-   * Return a union of the two groups assuring no
-   * duplicate items
-   * @param other
-   * @return <Return Description>  
-   * 
-   */
-  public SubGroup union(SubGroup other)
-  {
-    for (Item i : other.getItems())
-      ids.put(i.getId(), i);
-
-    return new SubGroup(this);
-  }
-
-  /**
-   * Return the uncommon elements (elements not shared by A or B)
-   * (Opposite of an intersection)
-   * @param other
-   * @return the difference of the two groups  
-   * 
-   */
-  public SubGroup difference(SubGroup other)
-  {
-    Set<Item> local = hashSet();
-    Set<Item> otherSet = other.hashSet();
-    
-    HashSet<Item> difference = new HashSet<Item>();
-    
-    for(Item i : local)
-      if(!otherSet.contains(i))
-        difference.add(i);
-    
-    for(Item i : otherSet)
-      if(!local.contains(i))
-        difference.add(i);
-    
-    return new SubGroup(difference, getName());
-  }
-
-  /**
-   * Return the intersection (common elements)
-   * @param other the set to intersect with
-   * @return the intersection of the set of the two groups  
-   * 
-   */
-  public SubGroup intersection(SubGroup other)
-  {
-    Set<Item> local = hashSet();
-    local.retainAll(other.hashSet());
-    return new SubGroup(local, getName());
-  }
-
   public SubGroup notEqual(String field, JSON value)
   {
     return new SubGroup(notEqualSet(field, value), getName());
@@ -731,13 +716,22 @@ public abstract class AbstractGroup implements Serializable
     return findSet(field, JSON.NULL, InstructionType.NOT_EQUAL);
   }
 
-  public synchronized void put(Item item)
+  /**
+   * Add an item to the group. An integer will
+   * be returned for that item indicating its ID;
+   * @param item the id to add.
+   * @return the id for this item.  
+   */
+  public synchronized String put(Item item)
   {
     if (item.getId() == null)
       item.setId(getNextId().toString());
 
     ids.put(item.getId(), item);
+    
+    final long countFinal = count; 
     count++;
+    return Long.toString(countFinal);
   }
 
   public void remove(AbstractGroup group)
@@ -782,21 +776,38 @@ public abstract class AbstractGroup implements Serializable
   }
 
   /**
-   * @return the keys for the map holding this set.  
+   * Return a union of the two groups assuring no
+   * duplicate items
+   * @param other
+   * @return <Return Description>  
+   * 
    */
-  protected Set<String> getKeys()
+  public SubGroup union(SubGroup other)
   {
-    return Collections.unmodifiableSet(ids.keySet());
+    for (Item i : other.getItems())
+      ids.put(i.getId(), i);
+
+    return new SubGroup(this);
+  }
+  
+  /**
+   * <p>
+   * Return a list of unique values for the field (ignoring null).
+   * </p>
+   * @param field the field to search
+   * @return the unique values for this field across the group  
+   * 
+   */
+  public Set<JSON> unique(String field)
+  {
+    HashSet<JSON> unique = new HashSet<JSON>();
+    
+    for(Item i : getAllItems())
+      unique.add(i.getValue(field).copy());
+    
+    return unique;
   }
 
-  protected HashSet<Item> hashSet()
-  {
-    HashSet<Item> items = new HashSet<Item>();
-    for(Item i : getItems())
-      items.add(i.copy());
-    
-    return items;
-  }
   /**
    * <JavaDoc>
    * @return the items in this group
@@ -804,6 +815,22 @@ public abstract class AbstractGroup implements Serializable
   protected Collection<Item> getItems()
   {
     return Collections.unmodifiableCollection(ids.values());
+  }
+
+  /**
+   * @return the keys for the map holding this set.  
+   */
+  protected Set<String> getKeys()
+  {
+    return Collections.unmodifiableSet(ids.keySet());
+  }
+  protected HashSet<Item> hashSet()
+  {
+    HashSet<Item> items = new HashSet<Item>();
+    for(Item i : getItems())
+      items.add(i.copy());
+    
+    return items;
   }
 
   private synchronized BigInteger getNextId()

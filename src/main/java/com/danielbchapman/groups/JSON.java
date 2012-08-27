@@ -41,6 +41,37 @@ public class JSON implements Comparable<JSON>, Serializable
     UNDEFINED = new JSON(null, JSONType.UNDEFINED);
   }
 
+  /* (non-Javadoc)
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode()
+  {
+    if(data == null)
+      return 23;
+    /* Our data is strings, so we're using that hash, the number 12 should has 
+     * to "12" in JSON as they are equivalent 
+     * */
+    return data.hashCode();
+    
+  }
+  
+  public static boolean empty(JSON j)
+  {
+    if(j == null)
+      return true;
+    
+    if(j.isNullOrUndefined())
+      return true;
+    
+    if(j.data == null)
+      return true;
+    
+    if(j.data.trim().length() < 1)
+      return true;
+    
+    return false;
+  }
   public static int compare(JSON a, JSON b)
   {
 
@@ -190,6 +221,15 @@ public class JSON implements Comparable<JSON>, Serializable
     if (data == null)
       return false;
 
+    if(data == null && comp.data == null)
+      return true;
+    
+    if(data != null && comp.data == null)
+      return false;
+    
+    if(data == null && comp.data != null)
+      return false;
+    
     return data.compareTo(comp.data) == 0;
   }
 
