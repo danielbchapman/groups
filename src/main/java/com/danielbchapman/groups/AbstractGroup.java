@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -132,19 +133,12 @@ public abstract class AbstractGroup implements Serializable
 
   public AbstractGroup(AbstractGroup group)
   {
-    for (Item i : group.getItems())
-      put(i);
+    this(group.getAllItems());
   }
 
   public AbstractGroup(java.util.Collection<Item> items)
   {
     for (Item i : items)
-      put(i);
-  }
-
-  public AbstractGroup(java.util.Set<Item> set)
-  {
-    for (Item i : set)
       put(i);
   }
 
@@ -158,6 +152,12 @@ public abstract class AbstractGroup implements Serializable
     return findSet(field, JSON.wrap(value), InstructionType.CONTAINS);
   }
 
+  public SubGroup copy()
+  {
+    SubGroup ret = new SubGroup(getAllItems(), getName());
+    
+    return ret;
+  }
   /**
    * Return the uncommon elements (elements not shared by A or B)
    * (Opposite of an intersection)
@@ -278,7 +278,14 @@ public abstract class AbstractGroup implements Serializable
     // TODO Do we have a synchronization problem?
     for (Item i : ids.values())
     {
-      JSON compare = i.getValue(field);
+      
+      JSON compare = null;
+      
+      if(Item.ID.equals(field))
+        compare = JSON.wrap(i.getId());
+      else
+        compare = i.getValue(field);
+      
       if (compare == null)
         compare = JSON.NULL;
       int result = compare.compareTo(value);
@@ -579,6 +586,93 @@ public abstract class AbstractGroup implements Serializable
     trueSet.addAll(notNullSet);
     return trueSet;
   }
+  
+  /**
+   * Perform an inner join (based on unique keys). In the event of duplicates an
+   * exception will be thrown if the strict field is true. If strict is false only the
+   * top value will be used. This could result in unstable data.
+   * 
+   * @param field the field to search for
+   * @param relation the group to relate TO
+   * @param fieldInRelation the field IN THE RELATION that will be matched to the FIELD
+   * @return A subgroup containing only items that are matched.
+   */
+  //FIXME Java Doc Needed
+  public SubGroup innerJoin(String field, AbstractGroup relation, String fieldInRelation, boolean strict)
+  {
+    SubGroup parse = notNull(field);
+    SubGroup remote = relation.notNull(fieldInRelation);
+    SubGroup ret = new SubGroup(parse.getName() + "::inner::" + relation.getName());
+    for(Item i : parse.getAllItems())
+    {
+      SubGroup g = remote.equal(fieldInRelation, i.getValue(field));
+      
+      if(g.count == 0)
+        continue;
+      
+      if(g.count > 1 && strict)
+      {
+        String message = MessageFormat.format(
+            "The query against GROUP[{0}] FIELD[{1}] resulted in multiple results for the VALUE[{2}]", 
+            relation.getName(), 
+            fieldInRelation, 
+            i.getValue(field));
+        throw new MultipleResultException(message);        
+      }
+      
+      Item put = i
+          .copy()
+          .setJoin(g.getAllItems().get(0), relation.getName());
+      ret.put(put);
+    }
+    
+    return ret;
+  }
+  
+  /**
+   * Perform an left outer join (based on unique keys). In the event of duplicates an
+   * exception will be thrown if the strict field is true. If strict is false only the
+   * top value will be used. This could result in unstable data.
+   * 
+   * @param field the field to search for
+   * @param relation the group to relate TO
+   * @param fieldInRelation the field IN THE RELATION that will be matched to the FIELD
+   * @return A subgroup containing all items in the first group with the possibility of joins that
+   * are matched in the second.
+   */
+  public SubGroup outerJoin(String field, AbstractGroup relation, String fieldInRelation, boolean strict)
+  {
+    SubGroup remote = relation.notNull(fieldInRelation);
+    SubGroup ret = new SubGroup(getName() + "::outer::" + relation.getName());
+    
+    for(Item i : getAllItems())
+    {
+      SubGroup g = remote.equal(fieldInRelation, i.getValue(field));
+      
+      if(g.count == 0)
+      {
+        ret.put(i);
+        continue;
+      }
+      
+      if(g.count > 1 && strict)
+      {
+        String message = MessageFormat.format(
+            "The query against GROUP[{0}] FIELD[{1}] resulted in multiple results for the VALUE[{2}]", 
+            relation.getName(), 
+            fieldInRelation, 
+            i.getValue(field));
+        throw new MultipleResultException(message);        
+      }
+      
+      Item put = i
+          .copy()
+          .setJoin(g.getAllItems().get(0), relation.getName());
+      ret.put(put);
+    }
+    
+    return ret;
+  }
 
   /**
    * @param field the field to search
@@ -833,7 +927,7 @@ public abstract class AbstractGroup implements Serializable
     return items;
   }
 
-  private synchronized BigInteger getNextId()
+  protected synchronized BigInteger getNextId()
   {
     nextId = nextId.add(BigInteger.ONE);
     return nextId;

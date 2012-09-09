@@ -63,6 +63,10 @@ public class TestCollection
     System.out.println("searching for '2' ");
     Item byId = test.find("2");
     System.out.println(byId);
+    
+    System.out.println("//===================== BY ID INDIRECT===================");
+    SubGroup byIdIndirect = test.lessThan(Item.ID, "20");
+    System.out.println(byIdIndirect.print());
 
     System.out.println("//===================== SEARCH ===================");
     printSearch(test, "iteration", new JSON(2), InstructionType.LESS_THAN);

@@ -16,6 +16,7 @@
 package com.danielbchapman.groups;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ import java.util.Set;
 public class Item implements Serializable, Comparable<Item>
 {
   private static final long serialVersionUID = 1L;
-
+  public final static String ID = "__id";
   /**
    * A simple compareTo call that handles nulls without issue
    * @param one the first object
@@ -85,6 +86,8 @@ public class Item implements Serializable, Comparable<Item>
   }
 
   private HashMap<String, JSON> data = new HashMap<String, JSON>();
+  
+  private HashMap<String, Item> joins;
 
   private String id;
 
@@ -148,13 +151,17 @@ public class Item implements Serializable, Comparable<Item>
    * command is issued.  
    * 
    */
-  public Item copy()
+  public synchronized Item copy()
   {
     Item ret = new Item();
     ret.setId(getId());
 
     for (String key : getKeys())
       ret.setValue(key, getValue(key).copy());
+    
+    if(isJoined())
+      for(String key : joinKeySet())
+        ret.setJoin(getJoin(key), key);
 
     return ret;
   }
@@ -207,20 +214,31 @@ public class Item implements Serializable, Comparable<Item>
   }
 
   /**
+   * <p>
    * Return the value for this field. If the value is not set
-   * and is not in the keyset it will return UNDEFINED else
+   * and is not in the key-set it will return UNDEFINED else
    * it will return NULL;
-   * 
+   * </p>
+   * <p>
    * If the value exists that value will be returned.
+   * </p>
+   * 
+   * <p>
+   * If this Item is joined to other items, the key will be cascaded down
+   * to the items stored in the join. This should allow search methods to be
+   * dynamically cascaded across multiple joins. <em>it should be noted that
+   * if the items that are joined contain the same key only the first key will
+   * be searched. The joins will effectively be masked.</em>
+   * </p>
    * @param field the field to look for (key)
    * @return the JSON value of that field, NULL or UNDEFINED.
    */
   public JSON getValue(final String field)
   {
-//    if (id == null)
-//      return null;
+    if(Item.ID.equals(field))
+      return JSON.wrap(getId());
 
-    if (data.containsKey(field))
+    if(data.containsKey(field))
     {
       JSON ret = data.get(field);
       if (ret == null)
@@ -229,7 +247,32 @@ public class Item implements Serializable, Comparable<Item>
       return ret.copy();
     }
     else
-      return JSON.UNDEFINED;
+      if(isJoined())
+      {
+        for(Item i : getJoinedItems())
+        {
+          JSON ret = getValue(i, field);
+          if(ret != null)
+            return ret;
+        }
+        return JSON.UNDEFINED;
+      }
+      else
+        return JSON.UNDEFINED;
+  }
+  
+  private static JSON getValue(final Item item, final String field)
+  {
+    if(item.data.containsKey(field))
+    {
+      JSON ret = item.data.get(field);
+      if (ret == null)
+        return JSON.NULL;
+
+      return ret.copy();
+    }
+    else
+      return null;
   }
 
   public Map<String, JSON> getValues()
@@ -291,6 +334,21 @@ public class Item implements Serializable, Comparable<Item>
     build.append(id);
     build.append("]");
 
+    Set<String> joins = joinKeySet();
+    
+    if(isJoined())
+      build.append(" Joins: ");
+    
+    if(isJoined())
+      for(String s : joins)
+      {
+        build.append("{");
+        build.append(s);
+        build.append("} ");
+      }
+    
+    if(isJoined())
+      build.append("| ");
     for (String key : data.keySet())
     {
       build.append("{\"");
@@ -300,6 +358,14 @@ public class Item implements Serializable, Comparable<Item>
       build.append("}");
     }
 
+    if(isJoined())
+      for(String s : joins)
+      {
+        build.append("\t{");
+        build.append(s);
+        build.append("}");
+        build.append(getJoin(s));
+      }
     return build.toString();
   }
 
@@ -351,5 +417,61 @@ public class Item implements Serializable, Comparable<Item>
       this.ignore = ignore;
     }
 
+  }
+  
+  public final boolean isJoined()
+  {
+    if(joins != null)
+      return true;
+    else
+      return false;
+  }
+  
+  public final Set<String> joinKeySet()
+  {
+    HashSet<String> set = new HashSet<String>();
+    if(isJoined())
+      for(String s : joins.keySet())
+        set.add(s);
+    
+    return set;
+  }
+  
+  public final synchronized ArrayList<Item> getJoinedItems()
+  {
+    ArrayList<Item> ret = new ArrayList<Item>();
+    if(isJoined())
+      for(Item i : joins.values())
+        ret.add(i.copy());
+    
+    return ret;
+  }
+  
+  protected synchronized Item setJoin(Item item, String key)
+  {
+    if(joins == null)
+      joins = new HashMap<String, Item>();
+    
+    joins.put(key, item);
+    return this;
+  }
+  
+  protected synchronized void clearJoin(String key)
+  {
+    if(joins != null)
+    {
+      joins.remove(key);
+      if(joins.isEmpty())
+        joins = null;
+    }
+      
+  }
+  
+  public synchronized Item getJoin(String key)
+  {
+    if(joins != null)
+      return joins.get(key).copy();
+    else
+      return null;
   }
 }

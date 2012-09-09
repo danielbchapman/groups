@@ -16,6 +16,9 @@
 
 package com.danielbchapman.groups;
 
+import java.math.BigInteger;
+import java.util.logging.Logger;
+
 /**
  * A temporary group that can be used to search against or as a smaller set of data. These
  * groups can then be merged or transformed into new data-sets.
@@ -29,7 +32,7 @@ package com.danielbchapman.groups;
 public class SubGroup extends AbstractGroup
 {
   private static final long serialVersionUID = 1L;
-
+  private static Logger logger = Logger.getLogger(SubGroup.class.getName());
   final protected String derivedFrom;
 
   public SubGroup(final java.util.Collection<Item> items, final String name)
@@ -38,6 +41,21 @@ public class SubGroup extends AbstractGroup
     derivedFrom = name;
   }
 
+  /* (non-Javadoc)
+   * @see com.danielbchapman.groups.AbstractGroup#put(com.danielbchapman.groups.Item)
+   */
+  @Override
+  public String put(Item item)
+  {
+    if(item.getId() == null)
+    {
+      BigInteger id = getNextId();
+      item.setId("TMP-" + getName() + "-" + id.toString());
+      logger.warning("The item was placed without an ID. This item will likely not make it to persistence. Please use sub-groups for queries only\n\t" + item);
+    }
+    
+    return super.put(item);
+  }
   public SubGroup(final java.util.Set<Item> items, final String name)
   {
     super(items);
@@ -69,6 +87,11 @@ public class SubGroup extends AbstractGroup
     return derivedFrom;
   }
 
+  public String toString()
+  {
+    return print();
+  }
+  
   public String print()
   {
     StringBuilder build = new StringBuilder();
