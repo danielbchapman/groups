@@ -1,8 +1,12 @@
 package com.danielbchapman.groups.test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import com.danielbchapman.groups.Group;
 import com.danielbchapman.groups.Groups;
 import com.danielbchapman.groups.Item;
+import com.danielbchapman.groups.JSON;
 import com.danielbchapman.groups.SubGroup;
 
 public class TestJoins
@@ -86,6 +90,22 @@ public class TestJoins
       System.out.println("===================SEARCHING OUTER FOR JOINED INFORMATION===================");
       System.out.println("----outer.contains(TARGET, VALUE_THREE)");
       System.out.println(outer.contains(TARGET, VALUE_THREE));
+    }
+    
+    
+    {
+      System.out.println("===================INSERTING DATA ON OUTER JOIN===================");
+      SubGroup outer = one.outerJoin(Item.ID, two, JOIN, false);
+      ArrayList<Item> list = outer.getAllItems();
+      
+      final HashMap<String, JSON> update = new HashMap<String, JSON>();
+      update.put(INDEX, JSON.wrap("-=UPDATED=-"));
+      
+      for(int i = 0; i < list.size(); i++)
+        if(i % 3 == 0)
+          outer.merge(list.get(i), update);
+          
+      System.out.println(outer);
     }
     
     //BREAK DATA

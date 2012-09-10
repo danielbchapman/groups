@@ -300,8 +300,20 @@ public class Item implements Serializable, Comparable<Item>
     this.id = id;
   }
 
-  public void setValue(String field, Object value)
+  public synchronized void setValue(String field, Object value)
   {
+    if(isJoined())
+      if(!data.containsKey(field))
+      {
+        for(Item j : joins.values())
+          if(j.data.containsKey(field))
+          {
+            j.setValue(field, value);
+            return;
+          }
+      }
+      
+    //Default behavior
     if (value == null)
       data.put(field, JSON.NULL);
     else
