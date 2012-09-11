@@ -2,6 +2,7 @@ package com.danielbchapman.groups.test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 import com.danielbchapman.groups.Group;
 import com.danielbchapman.groups.Groups;
@@ -27,8 +28,8 @@ public class TestJoins
   {
     Group one = Groups.getGroup("master");
     Group two = Groups.getGroup("conditional");
+    Groups.setLevel(Level.ALL);
     
-
     for(int i = 0; i < 30; i++)
     {
       Item tmp = new Item();
@@ -49,7 +50,7 @@ public class TestJoins
     {
       int i = 0;
 
-      for(Item item : one.contains(DDD, "dog").getAllItems())
+      for(Item item : one.contains(DDD, "dog").all())
       {
         i++;
         Item tmp = new Item();
@@ -69,16 +70,22 @@ public class TestJoins
     {
       System.out.println("===================PRINTING JOIN DATA===================");
       System.out.println("---------GROUP ONE");
-      System.out.println(one.print());
+      System.out.println(one);
       System.out.println("---------GROUP TWO");
-      System.out.println(two.print());  
+      System.out.println(two);  
     }
     
     {
       System.out.println("===================TESTING INNER JOIN===================");
-      System.out.println("----two.innerJoin(JOIN, one, Item.ID, false).print());");
+      System.out.println("----two.innerJoin(JOIN, one, Item.ID, false));");
       SubGroup inner = two.innerJoin(JOIN, one, Item.ID, false);
       System.out.println(inner);  
+      System.out.println("========Key Set");
+      System.out.println("Keys ->");
+      for(String key : inner.all().get(0).keySet())
+        System.out.print("[" + key + "] ");
+      
+      System.out.println("]");
     }
     
     {
@@ -96,7 +103,7 @@ public class TestJoins
     {
       System.out.println("===================INSERTING DATA ON OUTER JOIN===================");
       SubGroup outer = one.outerJoin(Item.ID, two, JOIN, false);
-      ArrayList<Item> list = outer.getAllItems();
+      ArrayList<Item> list = outer.all();
       
       final HashMap<String, JSON> update = new HashMap<String, JSON>();
       update.put(INDEX, JSON.wrap("-=UPDATED=-"));
@@ -113,14 +120,14 @@ public class TestJoins
     SubGroup broken = new SubGroup("broken");
     {
       int i = 0;
-      for(Item item : two.getAllItems())
+      for(Item item : two.all())
       {
         i++;
         item.setId(null);
         if(i % 3 == 0)
         {
           Item dup = new Item();
-          for(String key : item.getKeys())
+          for(String key : item.keySet())
             dup.setValueIgnore(key, item.getValue(key));
           broken.put(dup);
           System.out.println("adding dup -> " + dup);
@@ -138,12 +145,12 @@ public class TestJoins
       try
       {
         System.out.println("\n\n===================TESTING INNER NON-STRICT EXCEPTION===================");
-        System.out.println("----broken.innerJoin(JOIN, one, Item.ID, false).print());");
+        System.out.println("----broken.innerJoin(JOIN, one, Item.ID, false));");
         SubGroup inner = broken.innerJoin(JOIN, one, Item.ID, false);
         System.out.println(inner);  
         
         System.out.println("===================TESTING INNER STRICT EXCEPTION===================");
-        System.out.println("----broken.innerJoin(JOIN, one, Item.ID, true).print());");
+        System.out.println("----broken.innerJoin(JOIN, one, Item.ID, true));");
         inner = broken.innerJoin(JOIN, one, Item.ID, true);
         System.out.println(inner);  
       }

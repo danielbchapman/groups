@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 public class SubGroup extends AbstractGroup
 {
   private static final long serialVersionUID = 1L;
-  private static Logger logger = Logger.getLogger(SubGroup.class.getName());
   final protected String derivedFrom;
 
   public SubGroup(final java.util.Collection<Item> items, final String name)
@@ -51,7 +50,7 @@ public class SubGroup extends AbstractGroup
     {
       BigInteger id = getNextId();
       item.setId("TMP-" + getName() + "-" + id.toString());
-      logger.warning("The item was placed without an ID. This item will likely not make it to persistence. Please use sub-groups for queries only\n\t" + item);
+      Groups.logWarning("The item was placed without an ID. This item will likely not make it to persistence. Please use sub-groups for queries only\n\t" + item);
     }
     
     return super.put(item);
@@ -77,7 +76,7 @@ public class SubGroup extends AbstractGroup
   public SubGroup chainLog(String message)
   {
     System.out.println("\n=========" + message + "=========");
-    System.out.println(print());
+    System.out.println(toString());
     return this;
   }
 
@@ -89,16 +88,11 @@ public class SubGroup extends AbstractGroup
 
   public String toString()
   {
-    return print();
-  }
-  
-  public String print()
-  {
     StringBuilder build = new StringBuilder();
 
     build.append("SubGroup of [" + derivedFrom + "]");
     build.append("\n");
-    for (Item i : getAllItems())
+    for (Item i : all())
     {
       build.append("\t");
       build.append(i);

@@ -57,7 +57,7 @@ public class TestCollection
       test.put(tmp);
     }
     System.out.println("//===================== TEST ===================");
-    System.out.println(test.print());
+    System.out.println(test);
 
     System.out.println("//===================== BY ID ===================");
     System.out.println("searching for '2' ");
@@ -66,7 +66,7 @@ public class TestCollection
     
     System.out.println("//===================== BY ID INDIRECT===================");
     SubGroup byIdIndirect = test.lessThan(Item.ID, "20");
-    System.out.println(byIdIndirect.print());
+    System.out.println(byIdIndirect);
 
     System.out.println("//===================== SEARCH ===================");
     printSearch(test, "iteration", new JSON(2), InstructionType.LESS_THAN);
@@ -109,7 +109,7 @@ public class TestCollection
     System.out.println("//===================== REMOVE ===================");
     System.out.println("test.remove(test.greaterThan(\"iteration\", 4));");
     test.remove(test.greaterThan("iteration", 4));
-    System.out.println(test.print());
+    System.out.println(test);
     
     System.out.println("//===================== SAVE/READ ===================");
     File target = new File("test/save/");
@@ -118,7 +118,7 @@ public class TestCollection
     {
       Group read = Group.read(target, "test");
       System.out.println("Reading collection....");
-      System.out.println(read.print());
+      System.out.println(read);
     }
     catch (FileNotFoundException e)
     {
@@ -148,10 +148,5 @@ public class TestCollection
   {
     for(Item i : items)
       System.out.println(i);
-  }
-  
-  public static void print(SubGroup group)
-  {
-    group.print();
   }
 }

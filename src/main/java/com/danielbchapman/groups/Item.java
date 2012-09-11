@@ -156,7 +156,7 @@ public class Item implements Serializable, Comparable<Item>
     Item ret = new Item();
     ret.setId(getId());
 
-    for (String key : getKeys())
+    for (String key : data.keySet())
       ret.setValue(key, getValue(key).copy());
     
     if(isJoined())
@@ -178,7 +178,7 @@ public class Item implements Serializable, Comparable<Item>
     if (!item.id.equals(id))
       return false;
 
-    for (String key : item.getKeys())
+    for (String key : item.keySet())
       if (Item.compareToNullSafe(item.getValue(key), getValue(key)) != 0)
         return false;
 
@@ -200,10 +200,31 @@ public class Item implements Serializable, Comparable<Item>
   }
 
   /**
-   * @return an unmodifiable set set of all keys for the data in this item. 
+   * @return an unmodifiable set of all keys for the data in this Item including keys in
+   * the joined Item(s). 
    * 
    */
-  public Set<String> getKeys()
+  public Set<String> keySet()
+  {
+    Set<String> newKeys = new HashSet<String>();
+    
+      for(String s : data.keySet())
+        newKeys.add(s); 
+     
+    if(isJoined())
+      for(Item i : joins.values())
+        for(String s : i.keySet())
+          newKeys.add(s);
+    
+    return Collections.unmodifiableSet(newKeys);
+  }
+
+  /**
+   * @return an unmodifiable set of all the keys for the data in the primary Item. This will
+   * not return the keys associated with any joins.  
+   * 
+   */
+  public Set<String> keySetNoJoins()
   {
     Set<String> newKeys = new HashSet<String>();
     
@@ -212,7 +233,6 @@ public class Item implements Serializable, Comparable<Item>
     
     return Collections.unmodifiableSet(newKeys);
   }
-
   /**
    * <p>
    * Return the value for this field. If the value is not set
@@ -347,7 +367,7 @@ public class Item implements Serializable, Comparable<Item>
     build.append("]");
 
     Set<String> joins = joinKeySet();
-    
+    Set<String> dataKeys = data.keySet();
     if(isJoined())
       build.append(" Joins: ");
     
@@ -361,7 +381,8 @@ public class Item implements Serializable, Comparable<Item>
     
     if(isJoined())
       build.append("| ");
-    for (String key : data.keySet())
+    
+    for (String key : dataKeys)
     {
       build.append("{\"");
       build.append(key);
@@ -459,12 +480,12 @@ public class Item implements Serializable, Comparable<Item>
     return ret;
   }
   
-  protected synchronized Item setJoin(Item item, String key)
+  protected synchronized Item setJoin(final Item item, final String key)
   {
     if(joins == null)
       joins = new HashMap<String, Item>();
     
-    joins.put(key, item);
+    joins.put(key, item.copy());
     return this;
   }
   

@@ -97,7 +97,7 @@ public abstract class AbstractGroup implements Serializable
 
   public static List<Item> sort(AbstractGroup group, String... fields)
   {
-    return sort(group.getAllItems(), fields);
+    return sort(group.all(), fields);
   }
 
   public static List<Item> sort(java.util.Collection<Item> items, String... fields)
@@ -133,7 +133,7 @@ public abstract class AbstractGroup implements Serializable
 
   public AbstractGroup(AbstractGroup group)
   {
-    this(group.getAllItems());
+    this(group.all());
   }
 
   public AbstractGroup(java.util.Collection<Item> items)
@@ -154,7 +154,7 @@ public abstract class AbstractGroup implements Serializable
 
   public SubGroup copy()
   {
-    SubGroup ret = new SubGroup(getAllItems(), getName());
+    SubGroup ret = new SubGroup(all(), getName());
     
     return ret;
   }
@@ -414,7 +414,7 @@ public abstract class AbstractGroup implements Serializable
    * @return a copy of this collection top to bottom (no order is guarenteed)
    * 
    */
-  public ArrayList<Item> getAllItems()
+  public ArrayList<Item> all()
   {
     ArrayList<Item> ret = new ArrayList<Item>();
 
@@ -603,7 +603,7 @@ public abstract class AbstractGroup implements Serializable
     SubGroup parse = notNull(field);
     SubGroup remote = relation.notNull(fieldInRelation);
     SubGroup ret = new SubGroup(parse.getName() + "::inner::" + relation.getName());
-    for(Item i : parse.getAllItems())
+    for(Item i : parse.all())
     {
       SubGroup g = remote.equal(fieldInRelation, i.getValue(field));
       
@@ -622,7 +622,7 @@ public abstract class AbstractGroup implements Serializable
       
       Item put = i
           .copy()
-          .setJoin(g.getAllItems().get(0), relation.getName());
+          .setJoin(g.all().get(0), relation.getName());
       ret.put(put);
     }
     
@@ -645,7 +645,7 @@ public abstract class AbstractGroup implements Serializable
     SubGroup remote = relation.notNull(fieldInRelation);
     SubGroup ret = new SubGroup(getName() + "::outer::" + relation.getName());
     
-    for(Item i : getAllItems())
+    for(Item i : all())
     {
       SubGroup g = remote.equal(fieldInRelation, i.getValue(field));
       
@@ -667,7 +667,7 @@ public abstract class AbstractGroup implements Serializable
       
       Item put = i
           .copy()
-          .setJoin(g.getAllItems().get(0), relation.getName());
+          .setJoin(g.all().get(0), relation.getName());
       ret.put(put);
     }
     
@@ -830,7 +830,7 @@ public abstract class AbstractGroup implements Serializable
 
   public void remove(AbstractGroup group)
   {
-    for (Item i : group.getAllItems())
+    for (Item i : group.all())
       remove(i);
   }
 
@@ -896,7 +896,7 @@ public abstract class AbstractGroup implements Serializable
   {
     HashSet<JSON> unique = new HashSet<JSON>();
     
-    for(Item i : getAllItems())
+    for(Item i : all())
       unique.add(i.getValue(field).copy());
     
     return unique;

@@ -64,13 +64,13 @@ public class Group extends AbstractGroup
     return name;
   }
   
-  public String print()
+  public String toString()
   {
     StringBuilder build = new StringBuilder();
   
     build.append("Collection [" + name + "]");
     build.append("\n");
-    for (Item i : getAllItems())
+    for (Item i : all())
     {
       build.append("\t");
       build.append(i);

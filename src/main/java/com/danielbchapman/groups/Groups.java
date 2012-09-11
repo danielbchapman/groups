@@ -16,6 +16,8 @@
 package com.danielbchapman.groups;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The manager class provides a set of static methods to access a set of groups. Each
@@ -31,7 +33,38 @@ import java.util.HashMap;
 public class Groups
 {
   private static HashMap<String, Group> groups = new HashMap<String, Group>();
-
+  private static Logger logger;
+  
+  static{
+    logger = Logger.getLogger(SubGroup.class.getName());
+    logger.setLevel(Level.OFF);
+  }
+  
+  public static void setLevel(Level level)
+  {
+    logger.setLevel(level == null ? Level.OFF : level);
+  }
+  
+  public static void logWarning(String message)
+  {
+    logger.warning(message);
+  }
+  
+  public static void logError(String message)
+  {
+    logger.severe(message);
+  }
+  
+  public static void logInfo(String message)
+  {
+    logger.info(message);
+  }
+  
+  public static Level getLevel()
+  {
+    return logger.getLevel();
+  }
+  
   public static Group getGroup(String name)
   {
     if (name == null)
