@@ -29,11 +29,11 @@ import java.util.Date;
  */
 public class JSON implements Comparable<JSON>, Serializable
 {
+  private static final long serialVersionUID = -8562994439940666907L;
   public static final JSON FALSE = new JSON(false);
   public static final JSON NULL;
   public static final JSON TRUE = new JSON(true);
   public static final JSON UNDEFINED;
-  private static final long serialVersionUID = -8562994439940666907L;
 
   static
   {
@@ -197,7 +197,7 @@ public class JSON implements Comparable<JSON>, Serializable
 
   public JSON copy()
   {
-    return new JSON(data);
+    return new JSON(data, type);
   }
 
   /*
