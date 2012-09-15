@@ -871,17 +871,21 @@ public abstract class AbstractGroup implements Serializable
 
   /**
    * Return a union of the two groups assuring no
-   * duplicate items
-   * @param other
-   * @return <Return Description>  
+   * duplicate items by ID.
+   * 
+   * @param other the array of other sets to perform a union on.
+   * @return the union of all sets provided. If none are
+   * provided a copy of this subGroup is returned.  
    * 
    */
-  public SubGroup union(SubGroup other)
+  
+  public SubGroup union(SubGroup ... others)
   {
-    for (Item i : other.getItems())
-      ids.put(i.getId(), i);
+    for(SubGroup other : others)
+      for (Item i : other.getItems())
+        ids.put(i.getId(), i);
 
-    return new SubGroup(this);
+    return new SubGroup(this);      
   }
   
   /**

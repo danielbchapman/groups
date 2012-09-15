@@ -16,9 +16,11 @@
 package com.danielbchapman.groups;
 
 import java.io.Serializable;
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,8 +39,8 @@ import java.util.Set;
  */
 public class Item implements Serializable, Comparable<Item>
 {
-  private static final long serialVersionUID = 1L;
   public final static String ID = "__id";
+  private static final long serialVersionUID = 1L;
   /**
    * A simple compareTo call that handles nulls without issue
    * @param one the first object
@@ -85,11 +87,25 @@ public class Item implements Serializable, Comparable<Item>
     return comp;
   }
 
-  private HashMap<String, JSON> data = new HashMap<String, JSON>();
+  private static JSON getValue(final Item item, final String field)
+  {
+    if(item.data.containsKey(field))
+    {
+      JSON ret = item.data.get(field);
+      if (ret == null)
+        return JSON.NULL;
+
+      return ret.copy();
+    }
+    else
+      return null;
+  }
   
-  private HashMap<String, Item> joins;
+  private HashMap<String, JSON> data = new HashMap<String, JSON>();
 
   private String id;
+
+  private HashMap<String, Item> joins;
 
   public Item()
   {
@@ -184,14 +200,15 @@ public class Item implements Serializable, Comparable<Item>
 
     return true;
   }
-
-  public boolean has(String field)
+  
+  /**
+   * An alias for getValue()
+   * @see {@link #getValue(String)}
+   * 
+   */
+  public JSON get(final String field)
   {
-    JSON j = getValue(field); 
-    if(j.isNullOrUndefined())
-      return true;
-    
-    return JSON.empty(j);
+    return getValue(field);
   }
   
   public String getId()
@@ -199,39 +216,33 @@ public class Item implements Serializable, Comparable<Item>
     return id;
   }
 
-  /**
-   * @return an unmodifiable set of all keys for the data in this Item including keys in
-   * the joined Item(s). 
-   * 
-   */
-  public Set<String> keySet()
+  public synchronized Item getJoin(String key)
   {
-    Set<String> newKeys = new HashSet<String>();
-    
-      for(String s : data.keySet())
-        newKeys.add(s); 
-     
-    if(isJoined())
-      for(Item i : joins.values())
-        for(String s : i.keySet())
-          newKeys.add(s);
-    
-    return Collections.unmodifiableSet(newKeys);
+    if(joins != null)
+      return joins.get(key).copy();
+    else
+      return null;
   }
 
+  public final synchronized ArrayList<Item> getJoinedItems()
+  {
+    ArrayList<Item> ret = new ArrayList<Item>();
+    if(isJoined())
+      for(Item i : joins.values())
+        ret.add(i.copy());
+    
+    return ret;
+  }
+  
   /**
-   * @return an unmodifiable set of all the keys for the data in the primary Item. This will
-   * not return the keys associated with any joins.  
+   * A hook for applications like JasperReports or other "Bean based" containers
+   * that don't deal well with specific fields.
+   * @return <Return Description>  
    * 
    */
-  public Set<String> keySetNoJoins()
+  public Item getThis()
   {
-    Set<String> newKeys = new HashSet<String>();
-    
-    for(String s : data.keySet())
-      newKeys.add(s);
-    
-    return Collections.unmodifiableSet(newKeys);
+    return this;
   }
   /**
    * <p>
@@ -281,23 +292,76 @@ public class Item implements Serializable, Comparable<Item>
         return JSON.UNDEFINED;
   }
   
-  private static JSON getValue(final Item item, final String field)
+  /**
+   * Return the contents of this JSON field
+   * as an integer
+   * @see {@link #getValue(String)}
+   * @param field the field to use
+   * @return the return value 
+   */
+  public Integer integer(String field)
   {
-    if(item.data.containsKey(field))
-    {
-      JSON ret = item.data.get(field);
-      if (ret == null)
-        return JSON.NULL;
-
-      return ret.copy();
-    }
-    else
-      return null;
+    return get(field).getNumber().intValue();
   }
-
+  
+  /**
+   * Return the contents of this JSON field
+   * as a number;
+   * @see {@link #getValue(String)}
+   * @param field the field to use
+   * @return the return value 
+   */
+  public Double decimal(String field)
+  {
+    return get(field).getNumber();
+  }
+  
+  /**
+   * Return the contents of this JSON field
+   * as a string
+   * @see {@link #getValue(String)}
+   * @param field the field to use
+   * @return the return value 
+   */
+  public String string(String field)
+  {
+    return get(field).getString();
+  }
+  /**
+   * Return the contents of this JSON field
+   * as a boolean
+   * @see {@link #getValue(String)}
+   * @param field the field to use
+   * @return the return value 
+   */
+  public Boolean bool(String field)
+  {
+    return get(field).getBoolean();
+  }
+  /**
+   * Return the contents of this JSON field
+   * as a Date
+   * @see {@link #getValue(String)}
+   * @param field the field to use
+   * @return the return value 
+   */
+  public Date date(String field)
+  {
+    return get(field).getDate();
+  }
+  
   public Map<String, JSON> getValues()
   {
     return Collections.unmodifiableMap(data);
+  }
+
+  public boolean has(String field)
+  {
+    JSON j = getValue(field); 
+    if(j.isNullOrUndefined())
+      return true;
+    
+    return JSON.empty(j);
   }
 
   /*
@@ -310,16 +374,69 @@ public class Item implements Serializable, Comparable<Item>
     return id.hashCode();
   }
 
+  public final boolean isJoined()
+  {
+    if(joins != null)
+      return true;
+    else
+      return false;
+  }
+  
+  public final Set<String> joinKeySet()
+  {
+    HashSet<String> set = new HashSet<String>();
+    if(isJoined())
+      for(String s : joins.keySet())
+        set.add(s);
+    
+    return set;
+  }
+
+  /**
+   * @return an unmodifiable set of all keys for the data in this Item including keys in
+   * the joined Item(s). 
+   * 
+   */
+  public Set<String> keySet()
+  {
+    Set<String> newKeys = new HashSet<String>();
+    
+      for(String s : data.keySet())
+        newKeys.add(s); 
+     
+    if(isJoined())
+      for(Item i : joins.values())
+        for(String s : i.keySet())
+          newKeys.add(s);
+    
+    return Collections.unmodifiableSet(newKeys);
+  }
+
+  /**
+   * @return an unmodifiable set of all the keys for the data in the primary Item. This will
+   * not return the keys associated with any joins.  
+   * 
+   */
+  public Set<String> keySetNoJoins()
+  {
+    Set<String> newKeys = new HashSet<String>();
+    
+    for(String s : data.keySet())
+      newKeys.add(s);
+    
+    return Collections.unmodifiableSet(newKeys);
+  }
+
   public void removeKey(String field)
   {
     data.remove(field);
   }
-  
+
   public void setId(String id)
   {
     this.id = id;
   }
-
+  
   public synchronized void setValue(String field, Object value)
   {
     if(isJoined())
@@ -339,7 +456,7 @@ public class Item implements Serializable, Comparable<Item>
     else
       data.put(field, new JSON(value));
   }
-
+  
   /**
    * A null safe setter that when passed null (as opposed to JSON.NULL or UNDEFINED
    * will pass over a field. This allows methods to have a more dynamic signature.
@@ -354,7 +471,7 @@ public class Item implements Serializable, Comparable<Item>
     else
       setValue(field, value);
   }
-
+  
   /*
    * (non-Javadoc)
    * @see java.lang.Object#toString()
@@ -401,7 +518,27 @@ public class Item implements Serializable, Comparable<Item>
       }
     return build.toString();
   }
-
+  
+  protected synchronized void clearJoin(String key)
+  {
+    if(joins != null)
+    {
+      joins.remove(key);
+      if(joins.isEmpty())
+        joins = null;
+    }
+      
+  }
+  
+  protected synchronized Item setJoin(final Item item, final String key)
+  {
+    if(joins == null)
+      joins = new HashMap<String, Item>();
+    
+    joins.put(key, item.copy());
+    return this;
+  }
+  
   public static class ItemComparator implements Comparator<Item>
   {
 
@@ -450,61 +587,5 @@ public class Item implements Serializable, Comparable<Item>
       this.ignore = ignore;
     }
 
-  }
-  
-  public final boolean isJoined()
-  {
-    if(joins != null)
-      return true;
-    else
-      return false;
-  }
-  
-  public final Set<String> joinKeySet()
-  {
-    HashSet<String> set = new HashSet<String>();
-    if(isJoined())
-      for(String s : joins.keySet())
-        set.add(s);
-    
-    return set;
-  }
-  
-  public final synchronized ArrayList<Item> getJoinedItems()
-  {
-    ArrayList<Item> ret = new ArrayList<Item>();
-    if(isJoined())
-      for(Item i : joins.values())
-        ret.add(i.copy());
-    
-    return ret;
-  }
-  
-  protected synchronized Item setJoin(final Item item, final String key)
-  {
-    if(joins == null)
-      joins = new HashMap<String, Item>();
-    
-    joins.put(key, item.copy());
-    return this;
-  }
-  
-  protected synchronized void clearJoin(String key)
-  {
-    if(joins != null)
-    {
-      joins.remove(key);
-      if(joins.isEmpty())
-        joins = null;
-    }
-      
-  }
-  
-  public synchronized Item getJoin(String key)
-  {
-    if(joins != null)
-      return joins.get(key).copy();
-    else
-      return null;
   }
 }
