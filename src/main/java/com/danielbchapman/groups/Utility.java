@@ -58,9 +58,9 @@ public class Utility
           return 0;
         
         if(i >= oneC.length)
-          return 1;
-        else
           return -1;
+        else
+          return 1;
       }
       
       if(oneC[i] != twoC[j])
@@ -145,10 +145,13 @@ public class Utility
    */
   private static int lookahead(char[] string, int start)
   { 
-    for(int i = start; i < string.length; i++)
+    if(!intCheck(string[start]))
+      return start;
+      
+    for(int i = start + 1; i < string.length; i++)
     {
       if(!intCheck(string[i]))
-        return i;
+        return i - 1;
     }
     
     return string.length - 1;
