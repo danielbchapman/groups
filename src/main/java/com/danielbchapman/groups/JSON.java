@@ -170,7 +170,9 @@ public class JSON implements Comparable<JSON>, Serializable
       case UNDEFINED:
         return 0;
       case STRING:
-        return data.compareTo(toCompare.data);
+      {
+        return Utility.compareStringNumericData(data, toCompare.data);
+      }
       case NUMBER:
       case DATE:
         return Double.valueOf(data).compareTo(Double.valueOf(toCompare.data));
@@ -191,7 +193,7 @@ public class JSON implements Comparable<JSON>, Serializable
       if (toCompare.isNullOrUndefined())
         return 1;
 
-      return data.compareTo(toCompare.data);
+      return Utility.compareStringNumericData(data, toCompare.data);
     }
   }
 

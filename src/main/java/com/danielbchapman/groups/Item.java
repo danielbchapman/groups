@@ -216,6 +216,27 @@ public class Item implements Serializable, Comparable<Item>
     return id;
   }
 
+  /**
+   * A method to retrieve the base item i.e. customer joins address would return customer.
+   * @return a copy of the base item of this join (removing all join information)   
+   * 
+   */
+  public synchronized Item getJoinBase()
+  {
+    Item ret = new Item();
+    ret.setId(getId());
+
+    for (String key : data.keySet())
+      ret.setValue(key, getValue(key).copy());
+    
+    return ret;
+  }
+  /**
+   * Return the joined item for the group key
+   * @param key the key naming the group "i.e. customers"
+   * @return The item that is joined in this composite, or null if it does not exist.
+   * 
+   */
   public synchronized Item getJoin(String key)
   {
     if(joins != null)
