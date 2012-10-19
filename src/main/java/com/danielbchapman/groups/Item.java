@@ -403,6 +403,20 @@ public class Item implements Serializable, Comparable<Item>
       return false;
   }
   
+  public final boolean isEmpty(String key)
+  {
+    if(isNull(key))
+      return true;
+    else
+    {
+      String data = string(key);
+      if(data == null)
+        return true;
+      
+      return data.trim().isEmpty();
+    }
+  }
+  
   public final boolean isJoined()
   {
     if(joins != null)
