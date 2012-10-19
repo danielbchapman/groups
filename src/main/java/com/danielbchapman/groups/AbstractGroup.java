@@ -859,6 +859,10 @@ public abstract class AbstractGroup implements Serializable
       remove(i);
   }
 
+  public long size()
+  {
+    return count;
+  }
   public List<Item> sort(String... fields)
   {
     return AbstractGroup.sort(this, fields);

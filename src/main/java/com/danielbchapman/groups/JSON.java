@@ -246,13 +246,23 @@ public class JSON implements Comparable<JSON>, Serializable
   }
 
   public Integer getInteger()
-  {
+  { 
     return Integer.valueOf((int) Math.floor(getNumber()));
   }
 
   public Double getNumber()
   {
-    return Double.valueOf(data);
+    if(JSONType.NUMBER.equals(data))
+      return Double.valueOf(data);
+    else
+      try
+      {
+        return Double.valueOf(data);    
+      }
+      catch(NumberFormatException e)
+      {
+        return null;
+      }
   }
 
   public String getRegexSafeString()

@@ -395,6 +395,14 @@ public class Item implements Serializable, Comparable<Item>
     return id.hashCode();
   }
 
+  public final boolean isNull(String key)
+  {
+    if(get(key).isNullOrUndefined())
+      return true;
+    else
+      return false;
+  }
+  
   public final boolean isJoined()
   {
     if(joins != null)
