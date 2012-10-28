@@ -47,8 +47,9 @@ public class JSON implements Comparable<JSON>, Serializable
   @Override
   public int hashCode()
   {
-    if(data == null)
-      return 23;
+    if(data == null || isNullOrUndefined())
+      return 0;
+//      return "null".hashCode();
     /* Our data is strings, so we're using that hash, the number 12 should has 
      * to "12" in JSON as they are equivalent 
      * */
@@ -208,8 +209,8 @@ public class JSON implements Comparable<JSON>, Serializable
    */
   public boolean equals(Object obj)
   {
-    if(type == JSONType.NULL || type == JSONType.UNDEFINED)
-      if(obj == null)
+    if(obj == null)
+      if(type == JSONType.NULL || type == JSONType.UNDEFINED || data == null)
         return true; //NULL type == null
     
     JSON comp = null;
@@ -217,9 +218,9 @@ public class JSON implements Comparable<JSON>, Serializable
     if (obj instanceof JSON)
       comp = (JSON) obj;
 
-    if (comp == null)
-      return false;
-
+    if(comp.isNullOrUndefined() && isNullOrUndefined())
+      return true;
+    
     if (data == null)
       return false;
 
@@ -255,14 +256,17 @@ public class JSON implements Comparable<JSON>, Serializable
     if(JSONType.NUMBER.equals(data))
       return Double.valueOf(data);
     else
-      try
-      {
-        return Double.valueOf(data);    
-      }
-      catch(NumberFormatException e)
-      {
+      if(data == null)
         return null;
-      }
+      else
+        try
+        {
+          return Double.valueOf(data);    
+        }
+        catch(NumberFormatException e)
+        {
+          return null;
+        }
   }
 
   public String getRegexSafeString()
