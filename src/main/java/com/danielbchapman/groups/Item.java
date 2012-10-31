@@ -346,7 +346,15 @@ public class Item implements Serializable, Comparable<Item>
    */
   public String string(String field)
   {
-    return get(field).getString();
+    JSON val = get(field);
+    
+    if(val.isNullOrUndefined())
+      return null;
+    
+    if(val.getString().trim().isEmpty())
+      return "";
+    
+    return getValue(field).getString();
   }
   /**
    * Return the contents of this JSON field
@@ -395,6 +403,11 @@ public class Item implements Serializable, Comparable<Item>
     return id.hashCode();
   }
 
+  /**
+   * @param key the key to check
+   * @return return true of the field is NULL or UNDEFINED in type.  
+   * 
+   */
   public final boolean isNull(String key)
   {
     if(get(key).isNullOrUndefined())
@@ -403,6 +416,11 @@ public class Item implements Serializable, Comparable<Item>
       return false;
   }
   
+  /**
+   * @param key the key to check 
+   * @return true if the data contains something other than whitespace  
+   * 
+   */
   public final boolean isEmpty(String key)
   {
     if(isNull(key))
