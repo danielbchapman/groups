@@ -883,9 +883,9 @@ public abstract class AbstractGroup implements Serializable
    * 
    */
   
-  public SubGroup union(SubGroup ... others)
+  public SubGroup union(AbstractGroup ... others)
   {
-    for(SubGroup other : others)
+    for(AbstractGroup other : others)
       for (Item i : other.getItems())
         ids.put(i.getId(), i);
 
