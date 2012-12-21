@@ -825,7 +825,7 @@ public abstract class AbstractGroup implements Serializable
     
     final long countFinal = count; 
     count++;
-    return Long.toString(countFinal);
+    return item.getId();
   }
 
   public void remove(AbstractGroup group)
@@ -859,9 +859,9 @@ public abstract class AbstractGroup implements Serializable
       remove(i);
   }
 
-  public long size()
+  public int size()
   {
-    return count;
+    return ids.size();
   }
   public List<Item> sort(String... fields)
   {
