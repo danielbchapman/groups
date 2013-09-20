@@ -151,7 +151,7 @@ public class JSON implements Comparable<JSON>, Serializable
     mutateValue(value);
   }
 
-  private JSON(String data, JSONType type)
+  protected JSON(String data, JSONType type)
   {
     this.type = type;
     this.data = data;

@@ -122,7 +122,7 @@ public abstract class AbstractGroup implements Serializable
 
   private HashMap<String, Item> ids = new HashMap<String, Item>();
 
-  private BigInteger nextId = BigInteger.ZERO;
+  protected BigInteger nextId = BigInteger.ZERO;
 
   // HashMap [field/set<id>]
   // private HashMap<String, JSON[][]> indecies = new HashMap<String, JSON[][]>();
@@ -408,7 +408,12 @@ public abstract class AbstractGroup implements Serializable
 
     return merge;
   }
-
+  
+  public Item first()
+  {
+    return all().get(0);
+  }
+  
   /**
    * Gets all the items in the collection
    * @return a copy of this collection top to bottom (no order is guarenteed)

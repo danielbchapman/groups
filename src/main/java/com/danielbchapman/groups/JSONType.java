@@ -26,5 +26,46 @@ package com.danielbchapman.groups;
  */
 public enum JSONType
 {
-  NUMBER, STRING, BOOLEAN, UNDEFINED, DATE, NULL
+  NUMBER, STRING, BOOLEAN, UNDEFINED, DATE, NULL;
+  
+  public String toString()
+  {
+    if(this == NUMBER)
+      return "number";
+    
+    if(this == STRING)
+      return "string";
+    
+    if(this == BOOLEAN)
+      return "bool";
+    
+    if(this == DATE)
+      return "date";
+    
+    if(this == NULL)
+      return "null";
+    
+    return "undefined";
+  }
+  
+  public static JSONType fromString(String string)
+  {
+    if(string == null)
+      return UNDEFINED;
+    
+    if(string.equals("undefined"))
+      return UNDEFINED;
+    if("null".equals(string))
+      return NULL;
+    if("bool".equals(string))
+      return BOOLEAN; 
+    if("number".equals(string))
+      return NUMBER;
+    if("date".equals(string))
+      return DATE;
+    if("string".equals(string))
+      return STRING;
+
+    return UNDEFINED;
+  }
 }
