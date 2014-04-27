@@ -15,6 +15,7 @@
 *****************************************************************************/
 package com.danielbchapman.groups;
 
+import java.awt.image.ReplicateScaleFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -166,11 +167,28 @@ public class Groups
         for(String s : i.keySet())
         {
           JSON value = i.get(s);
-          Element field = doc.createElement(s);
-          String content = i.string(s);
-          field.setTextContent(content);
-          field.setAttribute(TYPE, value.getType().toString());
-          item.appendChild(field);
+          //Escape keys
+          s = s.replaceAll("\"", "&quot;")
+              .replaceAll("/", "-")
+              .replaceAll("'", "&apos;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;")
+              .replaceAll("&", "&amp;")
+              .replaceAll(" ", "_");
+          
+          try
+          {
+            Element field = doc.createElement(s);
+            String content = i.string(s);
+            field.setTextContent(content);
+            field.setAttribute(TYPE, value.getType().toString());
+            item.appendChild(field);
+          }
+          catch(org.w3c.dom.DOMException e)
+          {
+            System.err.println("Unable to process key: " + s + " and value " + value.getType().toString());
+            throw e;
+          }
         }
         
         group.appendChild(item);
@@ -273,6 +291,13 @@ public class Groups
           String jsonType = json.getAttributes().getNamedItem(TYPE).getNodeValue().toString();
           JSONType type = JSONType.fromString(jsonType);
           JSON value = new JSON(json.getTextContent(), type);
+          String nodeName = json.getNodeName();
+          nodeName = nodeName
+              .replaceAll("&quot;", "\"")
+              .replaceAll("&apos;", "'")
+              .replaceAll("&lt;", "<")
+              .replaceAll("&gt;", ">")
+              .replaceAll("&amp;", "&");
           itemToLoad.setValue(json.getNodeName(), value);
         }
         toLoad.put(itemToLoad);
