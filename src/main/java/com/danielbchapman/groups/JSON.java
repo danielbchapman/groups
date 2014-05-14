@@ -248,6 +248,9 @@ public class JSON implements Comparable<JSON>, Serializable
 
   public Integer getInteger()
   { 
+    Number number = getNumber();
+    if(number == null)
+      return null;
     return Integer.valueOf((int) Math.floor(getNumber()));
   }
 

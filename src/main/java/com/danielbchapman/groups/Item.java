@@ -17,6 +17,7 @@ package com.danielbchapman.groups;
 
 import java.io.Serializable;
 import java.io.ObjectInputStream.GetField;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -322,7 +323,8 @@ public class Item implements Serializable, Comparable<Item>
    */
   public Integer integer(String field)
   {
-    return get(field).getNumber().intValue();
+    Double d = get(field).getNumber();
+    return d == null ? null : get(field).getNumber().intValue();
   }
   
   /**
@@ -337,6 +339,41 @@ public class Item implements Serializable, Comparable<Item>
     return get(field).getNumber();
   }
   
+  /**
+   * This can return null, but returns the BigDecimal associate
+   * @param field
+   * @return <Return Description>  
+   * 
+   */
+  //FIXME Java Doc Needed
+  public BigDecimal bigDecimal(String field)
+  {
+    if(isEmpty(field))
+      return null;
+    
+    Number num = get(field).getNumber();
+    if(num == null)
+      return null;
+    
+    return new BigDecimal(string(field));
+  }
+  
+  /**
+   * Return a big decimal, if null return the default.
+   * @param field
+   * @param defaultValue
+   * @return <Return Description>  
+   * 
+   */
+  //FIXME Java Doc Needed
+  public BigDecimal bigDecimal(String field, BigDecimal defaultValue)
+  {
+    BigDecimal ret = bigDecimal(field);
+    if(ret == null)
+      return defaultValue;
+    else
+      return ret;
+  }
   /**
    * Return the contents of this JSON field
    * as a string
