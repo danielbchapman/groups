@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -242,6 +243,63 @@ public class Groups
         }
       }
     }
+  }
+  
+  private static boolean isWhitespaceNode(Node node)
+  {
+    if(node == null)
+      return false;
+    
+    if(node.getNodeType() == Node.TEXT_NODE && node.getTextContent().trim().length() < 1)
+      return true;
+    
+    return false;
+  }
+  public static ArrayList<Item> readItemsFromXml(InputStream is) throws ParserConfigurationException, SAXException, IOException, GroupFormatException 
+  {
+    ArrayList<Item> ret = new ArrayList<Item>();
+    
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    Document doc = builder.parse(is);
+    
+    Element root = doc.getDocumentElement();
+    //TODO Check Version
+    if(!"list".equals(root.getTagName()))
+      throw new RuntimeException("Malformed XML, root node is not of type 'list'");
+    
+    NodeList groups = root.getChildNodes();
+    
+    for(int i = 0; i < root.getChildNodes().getLength(); i++)
+    {
+      Node item = root.getChildNodes().item(i);
+      if(item.getNodeType() == Node.TEXT_NODE && item.getNodeValue().trim().length() < 1)
+        continue; //skip whitespace
+      
+      Item toLoad = new Item();
+      toLoad.setId(item.getAttributes().getNamedItem("id").getNodeValue());
+      
+      if(item != null && item.hasChildNodes())
+      {
+        for(int j = 0; j < item.getChildNodes().getLength(); j++)
+        {
+          Node field = item.getChildNodes().item(j);
+          if(field == null || isWhitespaceNode(field))
+            continue;
+          
+          String name = field.getAttributes().getNamedItem("name").getNodeValue();
+          String type = field.getAttributes().getNamedItem("type").getNodeValue();
+          Node value = field.getFirstChild();
+          String nodeValue = value == null ? "" : value.getNodeValue();
+          
+          toLoad.setValue(name, new JSON(nodeValue, JSONType.fromString(type)));
+        }
+      }
+      
+      ret.add(toLoad);
+    }
+    
+    return ret;
   }
   
   public static void fromXml(InputStream is) throws ParserConfigurationException, GroupFormatException, SAXException, IOException
