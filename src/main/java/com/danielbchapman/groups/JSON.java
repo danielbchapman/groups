@@ -254,6 +254,17 @@ public class JSON implements Comparable<JSON>, Serializable
     return Integer.valueOf((int) Math.floor(getNumber()));
   }
 
+  public float asFloat()
+  {
+    return asFloat(0f);
+  }
+  
+  public float asFloat(float defaultNumber)
+  {
+    Double num = getNumber();
+    return num == null ? defaultNumber : num.floatValue();
+  }
+  
   public Double getNumber()
   {
     if(JSONType.NUMBER.equals(data))
