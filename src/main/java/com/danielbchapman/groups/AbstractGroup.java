@@ -411,7 +411,10 @@ public abstract class AbstractGroup implements Serializable
   
   public Item first()
   {
-    return all().get(0);
+	ArrayList<Item> all = all();
+    if(all.size() > 0)
+    	return all().get(0);
+    return null;
   }
   
   /**
