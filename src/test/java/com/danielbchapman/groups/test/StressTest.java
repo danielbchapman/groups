@@ -58,6 +58,7 @@ public class StressTest
     runStress(200000);//Out of Memory Error
   }
   
+  @SuppressWarnings("unused")
   public static void runStress(int i) throws FileNotFoundException
   {
     String name = "test@" + i;
@@ -74,6 +75,7 @@ public class StressTest
     System.out.println("Saved in " + (end - start) + " nanos");
     
     start = System.nanoTime();
+    
     Group read = Group.read(parent, name);
     end = System.nanoTime();
     System.out.println("Read in " + (end - start) + " nanos");

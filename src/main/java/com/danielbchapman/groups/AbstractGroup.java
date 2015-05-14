@@ -828,7 +828,6 @@ public abstract class AbstractGroup implements Serializable
 
     ids.put(item.getId(), item);
     
-    final long countFinal = count; 
     count++;
     return item.getId();
   }

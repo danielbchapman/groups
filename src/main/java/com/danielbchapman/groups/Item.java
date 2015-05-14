@@ -16,7 +16,6 @@
 package com.danielbchapman.groups;
 
 import java.io.Serializable;
-import java.io.ObjectInputStream.GetField;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;

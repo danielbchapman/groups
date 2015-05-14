@@ -17,7 +17,6 @@
 package com.danielbchapman.groups;
 
 import java.math.BigInteger;
-import java.util.logging.Logger;
 
 /**
  * A temporary group that can be used to search against or as a smaller set of data. These

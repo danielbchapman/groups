@@ -15,7 +15,6 @@
 *****************************************************************************/
 package com.danielbchapman.groups;
 
-import java.awt.image.ReplicateScaleFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,7 +61,9 @@ public class Groups
   private static final String NAME = "name";
   private static final String TYPE = "type";
   private static final String ITEM = "item";
+  @SuppressWarnings("unused")
   private static final String FIELD = "field";
+  @SuppressWarnings("unused")
   private static final String VALUE = "value";
   private static final String NEXT_ID = "nextId";
   private static final String COUNT = "maximumIdentification";
@@ -268,8 +269,6 @@ public class Groups
     if(!"list".equals(root.getTagName()))
       throw new RuntimeException("Malformed XML, root node is not of type 'list'");
     
-    NodeList groups = root.getChildNodes();
-    
     for(int i = 0; i < root.getChildNodes().getLength(); i++)
     {
       Node item = root.getChildNodes().item(i);
@@ -325,7 +324,6 @@ public class Groups
         
       
       String name = group.getAttributes().getNamedItem(NAME).getNodeValue();
-      int count = Integer.valueOf(group.getAttributes().getNamedItem(COUNT).getTextContent());
       BigInteger nextId = new BigInteger(group.getAttributes().getNamedItem(NEXT_ID).getTextContent());
       
       Group toLoad = new Group();

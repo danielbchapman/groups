@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.danielbchapman.data</groupId>
 	<artifactId>groups</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<name>Groups</name>
 	<description>A simple small database in pure Java supporting a chainable API and Maps wiht JSON</description>
 	<dependencies>
@@ -25,8 +25,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.0.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>
