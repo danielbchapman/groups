@@ -390,6 +390,9 @@ public class Item implements Serializable, Comparable<Item>
     if(val.getString().trim().isEmpty())
       return "";
     
+    if(val.getString().trim().equalsIgnoreCase("null"))
+      return "";
+    
     return getValue(field).getString();
   }
   /**
